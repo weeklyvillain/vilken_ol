@@ -1,7 +1,9 @@
 html
   head
     title= title
+    style
+        include ../css/index.css
   body
     h1= beerName
-    h3= price + " Kr"
+    h3= "Kostnad " + price + " Kr"
     a(href="https://www.systembolaget.se/" + prodId): p Öppna På Systembolaget
