@@ -4,6 +4,12 @@ html
     style
         include ../css/index.css
   body
-    h1= beerName
-    h3= "Kostnad " + price + " Kr"
-    a(href="https://www.systembolaget.se/" + prodId): p Öppna På Systembolaget
+    p= "Öl: " +  (beerIndex+1) + "/" + numOfBeers
+    div(class='vertical-center')
+        if beerNameThin
+            h1= beerNameBold +  ", " + beerNameThin
+        else
+            h1= beerNameBold
+        h3= taste
+        h4= "Kostnad: " + price + " Kr"
+        a(href="https://www.systembolaget.se/" + prodId): p Öppna På Systembolaget

@@ -91,7 +91,7 @@ app.get('/json', function (req, res) {
 
 app.get('/', function (req, res) {
   beer = get_random_beer();
-  res.render('index', { title: 'Hey', beerName: beer["ProductNameBold"], prodId: beer["ProductNumber"], price: beer["Price"]})
+  res.render('index', { title: 'Vilken öl idag?', beerNameBold: beer["ProductNameBold"], beerNameThin : beer["ProductNameThin"], prodId: beer["ProductNumber"], price: beer["Price"], taste: beer["Taste"], beerIndex: beers.indexOf(beer), numOfBeers: beers.length})
 })
 
 
