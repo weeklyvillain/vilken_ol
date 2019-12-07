@@ -18,8 +18,12 @@ const app = express();
 //	cert: certificate,
 //	ca: ca
 //};
+
+// default config
 let beers = [];
 let pageNr = 0;
+let maxPrice = 20;
+let store = "0504";
 
 const options = {
   url: `https://api-extern.systembolaget.se/product/v1/product/search?Page=${pageNr}&SubCategory=Öl`,
@@ -40,12 +44,12 @@ function callback(error, response, body) {
         // set new page
         pageNr = info["Metadata"]["NextPage"];
         // updates req url
-        options.url = `https://api-extern.systembolaget.se/product/v1/product/search?Page=${pageNr}&SubCategory=Öl&PriceMax=20`;
+        options.url = `https://api-extern.systembolaget.se/product/v1/product/search?Page=${pageNr}&SubCategory=Öl&PriceMax=${maxPrice}`;
         request(options, callback);
         // fulfix då systembolaget är noobs och man inte kan välja butik i sin search
         // jag kan ha fel checka detta senare men for now så funkar det.
         info["Hits"].forEach(function(beer) {
-          if(beer["IsInStoreSearchAssortment"].includes("0504")){
+          if(beer["IsInStoreSearchAssortment"].includes(store)){
             beers.push(beer);
           }
         });
@@ -61,6 +65,7 @@ function callback(error, response, body) {
       let num = info["message"].match(/\d+/)[0]
       console.log(info["message"]);
       // sover och testar hämta ny info
+      // * 1000 för att funktionen tar milliseconds
       sleep(num * 1000).then(() => {
         console.log("Sleep done! Gathering more Beer :)");
         request(options, callback);
@@ -68,16 +73,35 @@ function callback(error, response, body) {
     }
 }
 
-app.get('/sys', function (req, res) {
-    res.send(beers[Math.floor(Math.random() * (beers.length + 1))])
+
+function get_random_beer() {
+    return beers[Math.floor(Math.random() * (beers.length + 1))];
+}
+
+app.get('/json', function (req, res) {
+    res.send(get_random_beer())
 })
 
-app.get('/', (req, res) => res.send('Hello World!'))
+// app.get('/something', (req, res) => {
+//     if (req.query.maxPrice != null) {
+  //       maxPrice = req.query.maxPrice;
+  //     }
+  // })
+
+
+app.get('/', function (req, res) {
+  beer = get_random_beer();
+  res.render('index', { title: 'Hey', beerName: beer["ProductNameBold"], prodId: beer["ProductNumber"], price: beer["Price"]})
+})
+
 
 // Starting both http & https servers
 //const httpServer = http.createServer(app);
 //const httpsServer = https.createServer(credentials, app);
+// set view engine to use pug
 
+app.set('view engine', 'pug')
+app.set('views', './views')
 app.listen(80, () => {
 	console.log('HTTP Server running on port 80');
   // hämta info från systembolaget
