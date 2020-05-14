@@ -20,7 +20,9 @@ const app = express();
 //};
 
 // default config
-let beers = [];
+let rawdata = fs.readFileSync('beers.json');
+let temp_beers = [];
+let beers = JSON.parse(rawdata);
 let pageNr = 0;
 let maxPrice = 20;
 let store = "0504";
@@ -37,6 +39,7 @@ function sleep (time) {
 }
 
 function callback(error, response, body) {
+
     if (!error && response.statusCode == 200) {
       const info = JSON.parse(body);
       console.log(info["Metadata"]);
@@ -50,12 +53,16 @@ function callback(error, response, body) {
         // jag kan ha fel checka detta senare men for now så funkar det.
         info["Hits"].forEach(function(beer) {
           if(beer["IsInStoreSearchAssortment"].includes(store)){
-            beers.push(beer);
+            temp_beers.push(beer);
           }
         });
         //beers = beers.concat(info["Hits"]);
-        console.log(beers.length);
+        console.log(temp_beers.length);
       } else {
+        beers = temp_beers;
+        temp_beers = [];
+        
+
         console.log("Got all beers that met the requirement!");
       }
     }
@@ -75,11 +82,15 @@ function callback(error, response, body) {
 
 
 function get_random_beer() {
-    return beers[Math.floor(Math.random() * (beers.length + 1))];
+    return beers[Math.floor(Math.random() * (beers.length - 1))];
 }
 
-app.get('/json', function (req, res) {
+app.get('/api/random', function (req, res) {
     res.send(get_random_beer())
+})
+
+app.get('/api/all', function (req, res) {
+  res.send(beers)
 })
 
 // app.get('/something', (req, res) => {
@@ -88,10 +99,32 @@ app.get('/json', function (req, res) {
   //     }
   // })
 
+app.get("/update", async (req, res) => {
+  await request(options, callback)
+  res.send("updating")
+});
+
+app.get("/savedb", async (req, res) => {
+  let data = JSON.stringify(beers);
+  await fs.writeFileSync('beers.json', data)
+  res.send("saving done")
+});
+
+app.get("/cleardb", async (req, res) => {
+  await fs.writeFileSync('beers.json', "")
+  res.send("clear done")
+});
+
+app.get("/update", (req, res) => {
+  request(options, callback)
+});
 
 app.get('/', function (req, res) {
   beer = get_random_beer();
-  res.render('index', { title: 'Vilken öl idag?', beerNameBold: beer["ProductNameBold"], beerNameThin : beer["ProductNameThin"], prodId: beer["ProductNumber"], price: beer["Price"], taste: beer["Taste"], beerIndex: beers.indexOf(beer), numOfBeers: beers.length})
+  if(beer == undefined) {
+    res.send("Något gick fel kunde inte hitta din öl :(");
+  }
+  res.render('index', { title: 'Vilken öl idag?', beerNameBold: beer["ProductNameBold"], beerNameThin : beer["ProductNameThin"], prodId: beer["ProductNumber"], price: beer["Price"], taste: beer["BeverageDescriptionShort"], alcohol: beer["AlcoholPercentage"], beerIndex: beers.indexOf(beer) + 1, numOfBeers: beers.length})
 })
 
 
@@ -102,10 +135,10 @@ app.get('/', function (req, res) {
 
 app.set('view engine', 'pug')
 app.set('views', './views')
-app.listen(80, () => {
+app.listen(3000, () => {
 	console.log('HTTP Server running on port 80');
   // hämta info från systembolaget
-  request(options, callback)
+  //request(options, callback)
 });
 
 

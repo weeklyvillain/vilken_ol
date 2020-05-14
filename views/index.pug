@@ -7,7 +7,7 @@ html
     p= "Öl: " +  (beerIndex+1) + "/" + numOfBeers
     div(class='vertical-center')
         if beerNameThin
-            h1= beerNameBold +  ", " + beerNameThin
+            h1= beerNameBold +  ", " + beerNameThin + " (" + alcohol + "%)"
         else
             h1= beerNameBold
         h3= taste
