@@ -98,7 +98,7 @@ app.get('/api/all', function (req, res) {
   //       maxPrice = req.query.maxPrice;
   //     }
   // })
-
+/*
 app.get("/update", async (req, res) => {
   await request(options, callback)
   res.send("updating")
@@ -118,7 +118,7 @@ app.get("/cleardb", async (req, res) => {
 app.get("/update", (req, res) => {
   request(options, callback)
 });
-
+*/
 app.get('/', function (req, res) {
   beer = get_random_beer();
   if(beer == undefined) {
